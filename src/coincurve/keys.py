@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 from coincurve._libsecp256k1 import ffi, lib
 from coincurve.context import GLOBAL_CONTEXT, Context
 from coincurve.der import decode_der, encode_der
-from coincurve.ecdsa import cdata_to_der, der_to_cdata, deserialize_recoverable, recover, serialize_recoverable
+from coincurve.ecdsa import cdata_to_der, der_to_cdata, deserialize_compact, deserialize_recoverable, recover, serialize_recoverable
 from coincurve.flags import EC_COMPRESSED, EC_UNCOMPRESSED
 from coincurve.utils import (
     DEFAULT_NONCE,
@@ -541,6 +541,16 @@ class PublicKey:
 
         # A performance hack to avoid global bool() lookup.
         return not not verified  # noqa: SIM208
+
+    def verify_compact(self, signature, message, hasher=sha256):
+        msg_hash = hasher(message) if hasher is not None else message
+        if len(msg_hash) != 32:
+            raise ValueError('Message hash must be 32 bytes long.')
+
+        verified = lib.secp256k1_ecdsa_verify(self.context.ctx, deserialize_compact(signature), msg_hash, self.public_key)
+
+        # A performance hack to avoid global bool() lookup.
+        return not not verified
 
     def add(self, scalar: bytes, update: bool = False) -> PublicKey:  # noqa: FBT001, FBT002
         """
