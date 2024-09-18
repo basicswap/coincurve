@@ -25,7 +25,18 @@ def gather_sources_from_directory(directory: str) -> List[Source]:
         if filename.endswith('.h'):
             include_line = f'#include <{filename}>'
             sources.append(Source(filename, include_line))
-    return sorted(sources)
+
+    sorted_sources = sorted(sources)
+
+    # Send header files that depend on others to the back of the list
+    for reorder_file in ['secp256k1_ecdsaotves.h', 'secp256k1_dleag.h']:
+        for i, source in enumerate(sorted_sources):
+            if source.h == reorder_file:
+                sorted_sources.append(source)
+                del sorted_sources[i]
+                break
+
+    return sorted_sources
 
 
 define_static_lib = """

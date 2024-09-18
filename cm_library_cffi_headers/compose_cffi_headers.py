@@ -134,6 +134,21 @@ def remove_function_attributes(lines, attributes):
     return processed_lines
 
 
+def replace_line_sections(lines, sections):
+    processed_lines = []
+
+    for line in lines:
+        stripped_line = line.rstrip()
+
+        for section, replacement in sections.items():
+            stripped_line = stripped_line.replace(section, replacement)
+
+        if stripped_line:
+            processed_lines.append(stripped_line)
+
+    return processed_lines
+
+
 def remove_header_guard(lines, keywords):
     processed_lines = []
 
@@ -189,6 +204,18 @@ def make_header_cffi_compliant(src_header_dir, src_header, cffi_dir):
             'SECP256K1_WARN_UNUSED_RESULT': '',
             'SECP256K1_DEPRECATED': '',
             'SECP256K1_ARG_NONNULL': '',
+            'SODIUM_EXPORT': 'extern',
+            'SECP256K1_ARG_NONNULL': '',
+            'SECP256K1_ARG_NONNULL': '',
+        },
+    )
+    lines = replace_line_sections(
+        lines,
+        {
+            '__attribute__ ((warn_unused_result))': '',
+            '__attribute__ ((nonnull))': '',
+            '__attribute__ ((nonnull(1)))': '',
+            '__attribute__ ((deprecated))': '',
         },
     )
     lines = remove_special_defines(

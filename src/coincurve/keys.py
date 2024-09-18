@@ -4,7 +4,7 @@ from typing import Optional, Tuple
 from asn1crypto.keys import ECDomainParameters, ECPointBitString, ECPrivateKey, PrivateKeyAlgorithm, PrivateKeyInfo
 
 from coincurve.context import GLOBAL_CONTEXT, Context
-from coincurve.ecdsa import cdata_to_der, der_to_cdata, deserialize_recoverable, recover, serialize_recoverable
+from coincurve.ecdsa import cdata_to_der, der_to_cdata, deserialize_compact, deserialize_recoverable, recover, serialize_recoverable
 from coincurve.flags import EC_COMPRESSED, EC_UNCOMPRESSED
 from coincurve.types import Hasher, Nonce
 from coincurve.utils import (
@@ -445,6 +445,16 @@ class PublicKey:
             raise ValueError('Message hash must be 32 bytes long.')
 
         verified = lib.secp256k1_ecdsa_verify(self.context.ctx, der_to_cdata(signature), msg_hash, self.public_key)
+
+        # A performance hack to avoid global bool() lookup.
+        return not not verified
+
+    def verify_compact(self, signature, message, hasher=sha256):
+        msg_hash = hasher(message) if hasher is not None else message
+        if len(msg_hash) != 32:
+            raise ValueError('Message hash must be 32 bytes long.')
+
+        verified = lib.secp256k1_ecdsa_verify(self.context.ctx, deserialize_compact(signature), msg_hash, self.public_key)
 
         # A performance hack to avoid global bool() lookup.
         return not not verified

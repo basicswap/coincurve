@@ -8,17 +8,17 @@ if (PROJECT_IGNORE_SYSTEM_LIB OR NOT VENDORED_AS_SYSTEM_LIB_FOUND)
 
     # Set ULR based upon CMake definitions
     if (NOT VENDORED_UPSTREAM_URL)
-        set(VENDORED_UPSTREAM_URL "https://github.com/bitcoin-core/secp256k1/archive")
+        set(VENDORED_UPSTREAM_URL "https://github.com/basicswap/secp256k1/archive")
     endif()
 
     if (NOT VENDORED_UPSTREAM_REF)
        message(STATUS "VENDORED_UPSTREAM_REF not set, using default value.")
-       set(VENDORED_UPSTREAM_REF "1ad5185cd42c0636104129fcc9f6a4bf9c67cc40")
+       set(VENDORED_UPSTREAM_REF "fd8b63ccf8bcb48358a42c456f34e2488a55a688")
     endif()
 
     if (NOT VENDORED_UPSTREAM_SHA)
         message(STATUS "VENDORED_UPSTREAM_SHA not set, using default value.")
-        set(VENDORED_UPSTREAM_SHA "ba34be4319f505c5766aa80b99cfa696cbb2993bfecf7d7eb8696106c493cb8c")
+        set(VENDORED_UPSTREAM_SHA "c7be731d49d859817473149262bca151161daba1fbba0ad3c1e7ef0245e421ac")
     endif()
 
     if (NOT CMAKE_BUILD_TYPE)
