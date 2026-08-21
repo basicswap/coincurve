@@ -13,21 +13,26 @@ if (PROJECT_IGNORE_SYSTEM_LIB OR NOT VENDORED_AS_SYSTEM_LIB_FOUND)
 
     if (NOT VENDORED_UPSTREAM_REF)
        message(STATUS "VENDORED_UPSTREAM_REF not set, using default value.")
-       set(VENDORED_UPSTREAM_REF "fd8b63ccf8bcb48358a42c456f34e2488a55a688")
+       set(VENDORED_UPSTREAM_REF "98679b41ab5f03bcc87a0849405de7dc34be04c4")
     endif()
 
     if (NOT VENDORED_UPSTREAM_SHA)
         message(STATUS "VENDORED_UPSTREAM_SHA not set, using default value.")
-        set(VENDORED_UPSTREAM_SHA "c7be731d49d859817473149262bca151161daba1fbba0ad3c1e7ef0245e421ac")
+        set(VENDORED_UPSTREAM_SHA "f4a850fe414f4a1c8f92f44a5c588cb3264b67a68afb1943e9d31d1ebd24d6d3")
     endif()
 
     if (NOT CMAKE_BUILD_TYPE)
         set(CMAKE_BUILD_TYPE Release)
     endif()
 
-    # -fPIC is needed since we will link it from a shared object
+    # SECP256K1_DISABLE_SHARED was dropped upstream in favour of BUILD_SHARED_LIBS,
+    # which the vendored library only declares as an option when it is top-level.
     if (VENDORED_LIBRARY_STATIC_BUILD)
+        set(BUILD_SHARED_LIBS OFF)
+        # -fPIC is needed since we will link it from a shared object
         set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+    else()
+        set(BUILD_SHARED_LIBS ON)
     endif()
 
     include(UpdateVendoredLibraryOptions)
