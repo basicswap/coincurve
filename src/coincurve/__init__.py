@@ -2,7 +2,7 @@ from coincurve.context import GLOBAL_CONTEXT, Context
 from coincurve.keys import PrivateKey, PublicKey, PublicKeyXOnly
 from coincurve.utils import verify_signature
 
-__version__ = "21.0.4"
+__version__ = "21.0.5"
 __all__ = [
     "GLOBAL_CONTEXT",
     "Context",

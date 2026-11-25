@@ -28,6 +28,7 @@ def dleag_prove(private_key, nonce_bytes=None, context=GLOBAL_CONTEXT):
         private_key.secret,
         252,
         nonce_bytes,
+        ffi.NULL,
     )
 
     if rv != 1:
@@ -46,6 +47,7 @@ def dleag_verify(proof, context=GLOBAL_CONTEXT):
         context.ctx,
         proof_bytes,
         proof_length,
+        ffi.NULL,
     )
 
     return True if rv == 1 else False
@@ -88,6 +90,7 @@ def dleag_prove_gen(private_key, gen_e_a, gen_e_b, nonce_bytes=None, context=GLO
         _generator_ptr('secp256k1_generator_const_h'),
         gen_e_a,
         gen_e_b,
+        ffi.NULL,
     )
 
     if rv != 1:
@@ -114,6 +117,7 @@ def dleag_verify_gen(proof, gen_e_a, gen_e_b, context=GLOBAL_CONTEXT):
         _generator_ptr('secp256k1_generator_const_h'),
         gen_e_a,
         gen_e_b,
+        ffi.NULL,
     )
 
     return True if rv == 1 else False
