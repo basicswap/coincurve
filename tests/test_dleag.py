@@ -60,5 +60,31 @@ def test_dleag_gen_invalid_nonce_length():
         dleag_prove_gen(vk, ED25519_B, ED25519_B2, nonce_bytes=b'\x00' * 31)
 
 
+def test_dleag_msg32():
+    # A proof bound to msg32 verifies only with it, and an unbound one only without one.
+    vk = PrivateKey(valid_keydata)
+    msg32 = bytes(range(32))
+    other32 = bytes(range(1, 33))
+    bound = dleag_prove(vk, msg32=msg32)
+    assert dleag_verify(bound, msg32=msg32) is True
+    assert dleag_verify(bound, msg32=other32) is False
+    assert dleag_verify(bound) is False
+    assert dleag_verify(dleag_prove(vk), msg32=msg32) is False
+
+    bound_gen = dleag_prove_gen(vk, ED25519_B, ED25519_B2, msg32=msg32)
+    assert dleag_verify_gen(bound_gen, ED25519_B, ED25519_B2, msg32=msg32) is True
+    assert dleag_verify_gen(bound_gen, ED25519_B, ED25519_B2) is False
+
+
+def test_dleag_invalid_msg32_length():
+    vk = PrivateKey(valid_keydata)
+    with pytest.raises(ValueError):
+        dleag_prove(vk, msg32=b'\x00' * 31)
+    with pytest.raises(ValueError):
+        dleag_verify(b'\x00' * 100, msg32=b'\x00' * 33)
+    with pytest.raises(ValueError):
+        dleag_prove_gen(vk, ED25519_B, ED25519_B2, msg32=b'\x00' * 31)
+
+
 if __name__ == '__main__':
     pytest.main(['-s', __file__])

@@ -11,7 +11,16 @@ def get_nonce():
     return secrets.token_bytes(32)
 
 
-def dleag_prove(private_key, nonce_bytes=None, context=GLOBAL_CONTEXT):
+def _msg32_ptr(msg32):
+    # msg32 binds the proof to a 32-byte hash; None gives the unbound proof.
+    if msg32 is None:
+        return ffi.NULL
+    if len(msg32) != 32:
+        raise ValueError('Invalid msg32 length')
+    return ffi.from_buffer(msg32)
+
+
+def dleag_prove(private_key, nonce_bytes=None, msg32=None, context=GLOBAL_CONTEXT):
     proof_length = dleag_proof_len()
     proof_output = ffi.new('unsigned char[{}]'.format(proof_length))
 
@@ -28,7 +37,7 @@ def dleag_prove(private_key, nonce_bytes=None, context=GLOBAL_CONTEXT):
         private_key.secret,
         252,
         nonce_bytes,
-        ffi.NULL,
+        _msg32_ptr(msg32),
     )
 
     if rv != 1:
@@ -39,7 +48,7 @@ def dleag_prove(private_key, nonce_bytes=None, context=GLOBAL_CONTEXT):
     return bytes(ffi.buffer(proof_output, proof_length))
 
 
-def dleag_verify(proof, context=GLOBAL_CONTEXT):
+def dleag_verify(proof, msg32=None, context=GLOBAL_CONTEXT):
     proof_bytes = ffi.from_buffer(proof)
     proof_length = len(proof)
 
@@ -47,7 +56,7 @@ def dleag_verify(proof, context=GLOBAL_CONTEXT):
         context.ctx,
         proof_bytes,
         proof_length,
-        ffi.NULL,
+        _msg32_ptr(msg32),
     )
 
     return True if rv == 1 else False
@@ -60,7 +69,7 @@ def _generator_ptr(name):
     return gp
 
 
-def dleag_prove_gen(private_key, gen_e_a, gen_e_b, nonce_bytes=None, context=GLOBAL_CONTEXT):
+def dleag_prove_gen(private_key, gen_e_a, gen_e_b, nonce_bytes=None, msg32=None, context=GLOBAL_CONTEXT):
     # parameterized on ed25519 generators gen_e_a and gen_e_b, secp256k1 side uses G and H.
     if len(gen_e_a) != 32 or len(gen_e_b) != 32:
         raise ValueError('Invalid ed25519 generator length')
@@ -90,7 +99,7 @@ def dleag_prove_gen(private_key, gen_e_a, gen_e_b, nonce_bytes=None, context=GLO
         _generator_ptr('secp256k1_generator_const_h'),
         gen_e_a,
         gen_e_b,
-        ffi.NULL,
+        _msg32_ptr(msg32),
     )
 
     if rv != 1:
@@ -99,7 +108,7 @@ def dleag_prove_gen(private_key, gen_e_a, gen_e_b, nonce_bytes=None, context=GLO
     return bytes(ffi.buffer(proof_output, proof_length_p[0]))
 
 
-def dleag_verify_gen(proof, gen_e_a, gen_e_b, context=GLOBAL_CONTEXT):
+def dleag_verify_gen(proof, gen_e_a, gen_e_b, msg32=None, context=GLOBAL_CONTEXT):
     if len(gen_e_a) != 32 or len(gen_e_b) != 32:
         raise ValueError('Invalid ed25519 generator length')
 
@@ -117,7 +126,7 @@ def dleag_verify_gen(proof, gen_e_a, gen_e_b, context=GLOBAL_CONTEXT):
         _generator_ptr('secp256k1_generator_const_h'),
         gen_e_a,
         gen_e_b,
-        ffi.NULL,
+        _msg32_ptr(msg32),
     )
 
     return True if rv == 1 else False
